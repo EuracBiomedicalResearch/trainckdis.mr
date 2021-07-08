@@ -44,7 +44,7 @@ reproducing the material of the session.
 session, i.e. July 14th, 2021. After the session, updates will be
 performed based on requests or suggestions from the users. If you need
 to make a request, please open an issue
-[here](https://github.com/danielebottigliengo/trainckdis.mr/issues).
+[here](https://github.com/EuracBiomedicalResearch/trainckdis.mr/issues).
 
 ## Program
 
