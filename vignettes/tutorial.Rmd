@@ -1,0 +1,578 @@
+---
+title: "MR Kidney function on Systolic blood pressure"
+output: github_document
+bibliography: tutorial_bib.bib
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+# Introduction
+
+This document will serve as tutorial for demonstrating an MR analysis
+workflow. The evaluation of causal relationship between kidney function
+(KF), measured with estimated glomerular filtratio rate in serum creatinine
+(eGFRcr), and systolic blood pressure (SBP) will be used as case study.
+The analysis workflow is based on a recent study by Yu and colleagues
+[@yu_bidirectional_2020].
+
+The causal effect of eGFRcr on SBP will be investigated using two starting 
+sets of genetic instruments selected using two distinct rationales:
+
+1. The first approach includes all $256$ single nucleotide polymorphism
+   (SNP) associated with eGFRcr at a genome-wide significant level
+   ($p-value < 5\times10^{-8}$) provided in the supplementary table $S1$
+   in Wuttke et al. (2019) [@wuttke_catalog_2019].
+   
+2. The second approach includes $40$ of the starting $256$ SNPs
+   from genome wide association study (GWAS) of blood urea nitrogen (BUN).
+   Lower BUN are related to higher kidney function. Hence, the SNPs 
+   that are most likely associated with KF rather than eGFRcr should be
+   associated with BUN in the opposite direction. The $40$ SNPs were 
+   included in the second set because showed opposite effect direction
+   in BUN GWAS and satisfied the Bonferroni threshold ($p-value < 0.05/256$)
+   
+<br>
+   
+The tutorial will show how to implement the following steps of MR
+analysis:
+
+1. **Data preparation**, which involves LD clumping, data harmonization and
+   Steiger filtering
+   
+2. **MR primary analysis**, which involves running MR analysis using
+   inverse-variance-weighted (IVW) fixed-effects (FE) and random-effects
+   (RE) methods, displaying and interpreting results
+
+3. **Sensitivity analyses**, which involves detecting presence of
+   horizonal pleiotropy and using robust MR methods
+   
+All the steps will be implemented using `TwoSampleMR` R package. Moreover,
+the R code for implementing the MR analysis using `MendelianRandomization`
+R package will also be provided.
+
+```{r}
+options(width = 200)
+library(TwoSampleMR)
+library(MendelianRandomization)
+```
+
+<br>
+<br>
+
+# Approach 1
+
+## Data preparation
+Summary-level GWAS results for eGFRcr and SBP are imported. As already
+mentioned, eGFRcr data are available in supplementary material (table
+$S1$) from [@wuttke_catalog_2019]. UK Biobank (UKB) SBP data 
+have been extracted from summary statistics generated from 
+[Neal Lab](http://www.nealelab.is/uk-biobank) (file name: _4080_irnt.gwas.imputed_v3.both_sexes.tsv.bgz_).
+
+eGFRcr data:
+
+```{r}
+# Define the path for reading eGFR data
+exp_dir <- "data/eGFR_EA_index_SNPs_ST11.txt"
+
+exposure_all_dat <- read_exposure_data(
+   filename = exp_dir,
+   clump = TRUE,
+   sep = "\t",
+   snp_col = "rsid",
+   beta_col = "effect",
+   se_col = "se",
+   eaf_col = "freq",
+   effect_allele_col = "effect_allele",
+   other_allele_col = "non_effect_allele",
+   pval_col = "pvalue",
+   samplesize_col = "n",
+   gene_col = "gene",
+   min_pval = 0,
+   log_pval = FALSE
+)
+```
+
+By setting `clump = TRUE` LD clumping is automatically performed using
+`clump_data` function with default options, i.e. clumping window 
+$10000$ kb, $r^{2} < 0.001$, and European reference population. More
+details on the function can be found by typing `?clump_data`. The other
+inputs of the functions represent the names of the column for summary
+statistics in the original *.txt* file.
+
+After LD clumping, `r nrow(exposure_all_dat)` SNPs where retained.
+
+**Note: beta coefficient express the association between SNPs and eGFRcr on the log scale.**
+
+```{r}
+str(exposure_all_dat)
+```
+
+SBP data:
+
+```{r}
+out_dir <- "data/Neale_SBP_eGFR_SNPs_res.txt"
+
+outcome_all_dat <- read_outcome_data(
+  filename = out_dir,
+  snps = exposure_all_dat$SNP,  # Take only the SNPs for eGFR
+  sep = "\t",
+  snp_col = "rsid",
+  beta_col = "beta",
+  se_col = "se",
+  eaf_col = "AF",
+  effect_allele_col = "alt",
+  other_allele_col = "ref",
+  pval_col = "pval",
+  samplesize_col = "n_complete_samples",
+  min_pval = 0,
+  log_pval = FALSE
+)
+```
+
+```{r}
+str(outcome_all_dat)
+```
+
+Data harmonization:
+
+```{r}
+harm_data <- harmonise_data(exposure_all_dat, outcome_all_dat)
+```
+
+Steiger filtering:
+
+```{r}
+dat_steiger <- steiger_filtering(harm_data)
+```
+
+```{r}
+table(dat_steiger$steiger_dir)
+```
+
+Overall, $8$ out of $163$ SNPs are detected as having a direction opposite
+than the one under study (SBP $\rightarrow$ eGFRcr). Thus, given the
+SNPs removed after data harmonization and Steiger filtering, $152$
+genetic variants were selected as instruments for the MR analysis.
+
+Dataset for MR analysis:
+
+```{r}
+# Remove genetic variants with wrong effect direction
+mr_data <- harm_data[dat_steiger$steiger_dir, ]
+```
+
+Dataset input for MR analysis using `MendelianRandomization` package
+
+```{r}
+dat <- mr_data[mr_data$mr_keep, ]
+
+mr_data_input <- mr_input(
+   bx = dat$beta.exposure, 
+   bxse = dat$se.exposure,
+   by = dat$beta.outcome,
+   byse = dat$se.outcome, 
+   exposure = "log(eGFRcr)", 
+   outcome = "SBP", 
+   snps = dat$SNP, 
+   effect_allele = dat$effect_allele.exposure, 
+   other_allele = dat$other_allele.exposure,
+   eaf = dat$eaf.exposure
+)
+```
+<br>
+
+## Primary MR analysis
+Once data have been prepared, MR analysis can be performed. The IVW-FE
+and IVW-RE are used:
+
+```{r}
+mr_primary <- mr(
+   dat = mr_data,
+   method_list = c("mr_ivw_fe", "mr_ivw_mre")
+)
+
+mr_primary
+```
+
+An increase in 1-unit eGFRcr on the log-scale is associated with an
+average decrease SBP of 0.056 mmHg. However, the large standard errors
+and p-values suggest small statistical evidence in favour of a causal
+association between eGFR and SBP. Notice that standard error of IVW-RE
+causal estimate is larger than IVW-FE causal estimate, suggesting 
+presence of heterogeneity in the single SNP causal effects.
+
+Visual inspection of MR results using scatter plot:
+
+```{r, fig.height = 8, fig.width = 12}
+mr_scatter_plot(mr_primary, mr_data)[[1]]
+```
+
+Forest plot:
+
+```{r, fig.height = 12, fig.width = 8}
+mr_forest_plot(mr_singlesnp(mr_data))[[1]]
+```
+
+Using `MendelianRandomization` package:
+
+```{r}
+# The package is called since mr_ivw function is contained in both
+# TwoSampleMR and MendelianRandomization packages
+mr_feivw_mendrand <- MendelianRandomization::mr_ivw(
+   mr_data_input, 
+   model = "fixed"
+)
+
+mr_reivw_mendrand <- MendelianRandomization::mr_ivw(
+   mr_data_input, 
+   model = "random"
+)
+
+mr_feivw_mendrand
+```
+
+```{r}
+mr_reivw_mendrand
+```
+
+```{r, fig.height = 12, fig.width = 16}
+mr_plot(
+   mr_data_input, line = "ivw", interactive = FALSE, labels = FALSE,
+   orientate = TRUE
+)
+```
+
+```{r, fig.height = 12, fig.width = 8}
+mr_forest(
+   mr_data_input,
+   methods = "ivw",
+   ordered = TRUE
+)
+```
+
+<br>
+
+## Sensitivity analyses
+In MR analysis, it is often recommend to check the presence of pleiotropic
+effects, which may undermine the validity of the genetic instruments. 
+If so, robust MR methods are used to assess how causal estimates change 
+when MR assumptions are relaxed.
+
+Q-statistic is used to check the presence of heterogeneity in the
+single genetic instrument estimates, which might suggest presence of
+pleiotropy:
+
+```{r}
+mr_heterogeneity(mr_data, method_list = "mr_ivw")
+```
+
+High Q-statistic and low p-value suggest strong heterogeneity in the
+single estimates. The heteogeneity was also confirmed by visual inspection
+of scatter and forest plots.
+
+MR-Egger intercept test can be a useful indicator if MR results are
+affected by horizontal pleiotropy:
+
+```{r}
+mr_pleiotropy_test(mr_data)
+```
+
+The high p-value suggests that horizontal pleiotropy should not be an
+issue.
+
+Three robust MR methods are used: MR-Egger, weighted median and weighted
+mode:
+
+```{r}
+mr_robust <- mr(
+   dat = mr_data,
+   method_list = c(
+      "mr_egger_regression", "mr_weighted_mode", "mr_weighted_median"
+   )
+)
+
+mr_robust
+```
+
+All robust methods suggest that higher eGFRcr levels are associated with
+increased SBP, even though there is no statistical evidence to support
+a causal effect of eGFRcr on SBP.
+
+Sensitivity analyses using `MendelianRandomization` R package
+
+```{r}
+# Q-statistic and I^2
+mr_feivw_mendrand
+```
+
+```{r}
+mr_egger_mendrand <- MendelianRandomization::mr_egger(mr_data_input)
+
+# Look at the intercept for pleiotropy and MR-Egger for causal estimate
+mr_egger_mendrand
+```
+
+```{r}
+# Weighted mode
+mr_mode_mendrand <- MendelianRandomization::mr_mbe(mr_data_input)
+
+mr_mode_mendrand
+```
+
+```{r}
+# Weighted median
+mr_median_mendrand <- MendelianRandomization::mr_median(mr_data_input)
+
+mr_median_mendrand
+```
+
+<br>
+
+<br>
+
+# Approach 2
+
+## Data preparation
+The second set of genetic variants was carefully selected to identify
+SNPs that are most likely associated with kidney function and not just
+eGFRcr.
+
+eGFRcr data:
+
+```{r}
+# Define the path for reading eGFR data
+exp_dir <- "data/eGFR_EA_index_SNPs_ST11_BUN_filtered.txt"
+
+exposure_bun_dat <- read_exposure_data(
+   filename = exp_dir,
+   clump = TRUE,
+   sep = "\t",
+   snp_col = "rsid",
+   beta_col = "effect",
+   se_col = "se",
+   eaf_col = "freq",
+   effect_allele_col = "effect_allele",
+   other_allele_col = "non_effect_allele",
+   pval_col = "pvalue",
+   samplesize_col = "n",
+   gene_col = "gene",
+   min_pval = 0,
+   log_pval = FALSE
+)
+```
+
+After LD clumping, `r nrow(exposure_bun_dat)` SNPs where retained.
+
+**Note: beta coefficient express the association between SNPs and eGFRcr on the log scale.**
+
+```{r}
+str(exposure_bun_dat)
+```
+
+Data harmonization:
+
+```{r}
+harm_data <- harmonise_data(exposure_bun_dat, outcome_all_dat)
+```
+
+Steiger filtering:
+
+```{r}
+dat_steiger <- steiger_filtering(harm_data)
+```
+
+```{r}
+table(dat_steiger$steiger_dir)
+```
+
+Overall, $2$ out of $31$ SNPs are detected as having a direction opposite
+than the one under study SBP ($\rightarrow$) eGFRcr. Thus, given the
+SNPs removed after data harmonization and Steiger filtering, $28$
+genetic variants were selected as instruments for the MR analysis.
+
+Dataset for MR analysis:
+
+```{r}
+# Remove genetic variants with wrong effect direction
+mr_data <- harm_data[dat_steiger$steiger_dir, ]
+```
+
+Dataset input for MR analysis using `MendelianRandomization` package
+
+```{r}
+dat <- mr_data[mr_data$mr_keep, ]
+
+mr_data_input <- mr_input(
+   bx = dat$beta.exposure, 
+   bxse = dat$se.exposure,
+   by = dat$beta.outcome,
+   byse = dat$se.outcome, 
+   exposure = "log(eGFRcr)", 
+   outcome = "SBP", 
+   snps = dat$SNP, 
+   effect_allele = dat$effect_allele.exposure, 
+   other_allele = dat$other_allele.exposure,
+   eaf = dat$eaf.exposure
+)
+```
+<br>
+
+## Primary MR analysis
+Primary MR analysis:
+
+```{r}
+mr_primary <- mr(
+   dat = mr_data,
+   method_list = c("mr_ivw_fe", "mr_ivw_mre")
+)
+
+mr_primary
+```
+
+An increase in 1-unit eGFRcr on the log-scale is associated with an
+average decrease in SBP of $0.85$ mmHg. The variability of the estimates 
+suggest strong statistical evidence in support of causal relationships
+between the phenotypes. As also observed in the first approach, the
+standard error of the IVW-RE estimate are doubled than IVW-FE, suggesting
+heterogeneity.
+
+Visual inspection of MR results using scatter plot:
+
+```{r, fig.height = 8, fig.width = 12}
+mr_scatter_plot(mr_primary, mr_data)[[1]]
+```
+
+Forest plot:
+
+```{r, fig.height = 12, fig.width = 8}
+mr_forest_plot(mr_singlesnp(mr_data))[[1]]
+```
+
+Using `MendelianRandomization` package:
+
+```{r}
+# The package is called since mr_ivw function is contained in both
+# TwoSampleMR and MendelianRandomization packages
+mr_feivw_mendrand <- MendelianRandomization::mr_ivw(
+   mr_data_input, 
+   model = "fixed"
+)
+
+mr_reivw_mendrand <- MendelianRandomization::mr_ivw(
+   mr_data_input, 
+   model = "random"
+)
+
+mr_feivw_mendrand
+```
+
+```{r}
+mr_reivw_mendrand
+```
+
+```{r, fig.height = 12, fig.width = 16}
+mr_plot(
+   mr_data_input, line = "ivw", interactive = FALSE, labels = FALSE,
+   orientate = TRUE
+)
+```
+
+```{r, fig.height = 12, fig.width = 8}
+mr_forest(
+   mr_data_input,
+   methods = "ivw",
+   ordered = TRUE
+)
+```
+
+<br>
+
+## Sensitivity analyses
+
+Q-statistic:
+
+```{r}
+mr_heterogeneity(mr_data, method_list = "mr_ivw")
+```
+
+The high Q-statistic suggests heterogeneity, probably driven by the three
+genetic instrumets with a strong positive association (see the forest 
+plot)
+
+MR-Egger intercept test:
+
+```{r}
+mr_pleiotropy_test(mr_data)
+```
+
+The p-value suggests that horizontal pleiotropy should not be an issue.
+
+Robust MR methods:
+
+```{r}
+mr_robust <- mr(
+   dat = mr_data,
+   method_list = c(
+      "mr_egger_regression", "mr_weighted_mode", "mr_weighted_median"
+   )
+)
+
+mr_robust
+```
+
+All robust methods suggest a strong statistical association between the
+phenotypes, with increased level of eGFRcr associated with lower SBP
+values.
+
+Sensitivity analyses using `MendelianRandomization` R package
+
+```{r}
+# Q-statistic and I^2
+mr_feivw_mendrand
+```
+
+```{r}
+mr_egger_mendrand <- MendelianRandomization::mr_egger(mr_data_input)
+
+# Look at the intercept for pleiotropy and Estimate for causal estimate
+mr_egger_mendrand
+```
+
+```{r}
+# Weighted mode
+mr_mode_mendrand <- MendelianRandomization::mr_mbe(mr_data_input)
+
+mr_mode_mendrand
+```
+
+```{r}
+# Weighted median
+mr_median_mendrand <- MendelianRandomization::mr_median(mr_data_input)
+
+mr_median_mendrand
+```
+
+<br>
+
+<br>
+
+# Final remarks
+In this tutorial a pipeline for MR analysis has been introduced. Indeed,
+the steps that involve the selection of genetic instruments and data
+preparation are crucial to ensure reliable causal estimates. As 
+demonstrated in the case study, a careful selection of genetic instruments
+consistently associated with both eGFRcr and BUN revealed a strong
+causal effect of eGFRcr and SBP, whereas a more liberal strategy did not
+identify any causal relationship. Moreover, sensitivity analyses and
+the use of robust methods are important to evaluate the sensitivity of
+the results. Using the second set of SNPs as instruments, both IVW
+and robust methods causal estimates were in support of strong causal 
+effect of eGFRcr on SBP, suggesting that the findings are reliable.
+
+<br>
+
+<br>
+
+## References
