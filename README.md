@@ -143,9 +143,9 @@ throughout the session
 
 ## Contributions
 
-| Name                                                           | Affiliation                                                                                                        | Role              |
-|:---------------------------------------------------------------|:-------------------------------------------------------------------------------------------------------------------|:------------------|
-| [Daniele Bottigliengo](https://github.com/danielebottigliengo) | [EURAC Research, Institute for Biomedicine](https://www.eurac.edu/en/institutes-centers/institute-for-biomedicine) | Author/Mainteiner |
+| Name                                                           | Affiliation                                                                                                        |
+|:---------------------------------------------------------------|:-------------------------------------------------------------------------------------------------------------------|
+| [Daniele Bottigliengo](https://github.com/danielebottigliengo) | [EURAC Research, Institute for Biomedicine](https://www.eurac.edu/en/institutes-centers/institute-for-biomedicine) |
 
 ## Reading list
 
