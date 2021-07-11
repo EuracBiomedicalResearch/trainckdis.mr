@@ -73,8 +73,16 @@ knowledge of `R` programming can be helpful although not mandatory.
 
 ## Software setup
 
--   Please dowload and install the latest `R` version from
+-   Please download and install the latest `R` version from
     [here](https://www.r-project.org/)
+
+-   For Windows users, please download and install the `Rtools` version
+    compatible with the latest `R` version installed on your machine
+    from
+    [here](https://cran.r-project.org/bin/windows/Rtools/history.html).
+    Please use the [following
+    tutorial](https://cran.r-project.org/bin/windows/Rtools/) (see
+    *Putting Rtools on the PATH*) to properly set up `Rtools`.
 
 -   Although it is not mandatory, it is recommended to download and
     install the latest `RStudio` version from
@@ -143,9 +151,10 @@ throughout the session
 
 ## Contributions
 
-| Name                                                           | Affiliation                                                                                                        |
-|:---------------------------------------------------------------|:-------------------------------------------------------------------------------------------------------------------|
-| [Daniele Bottigliengo](https://github.com/danielebottigliengo) | [EURAC Research, Institute for Biomedicine](https://www.eurac.edu/en/institutes-centers/institute-for-biomedicine) |
+| Name                                                                         | Affiliation                                                                                                        |
+|:-----------------------------------------------------------------------------|:-------------------------------------------------------------------------------------------------------------------|
+| [Daniele Bottigliengo](https://github.com/danielebottigliengo)               | [EURAC Research, Institute for Biomedicine](https://www.eurac.edu/en/institutes-centers/institute-for-biomedicine) |
+| [Adrienne Tin](https://scholar.google.com/citations?user=8FfPK3gAAAAJ&hl=en) | [University of Mississippi Medical Center](https://www.umc.edu/)                                                   |
 
 ## Reading list
 
