@@ -220,7 +220,7 @@ flow <- DiagrammeR::grViz("digraph{
   
   # Define the edges
   primary -> {iv, ivs} iv -> wald ivs -> ivw ivw -> {re, fe}
-  fe -> corr re -> ce ce -> sens
+  fe -> corr fe -> ce corr -> ce re -> ce ce -> sens
   
 
 }")
