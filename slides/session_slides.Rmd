@@ -177,18 +177,22 @@ install.packages("MendelianRandomization", dependencies = TRUE)
 
 # IVs selection
 
-1. .font140[Selection of genome-wide significant instruments from GWAS exposure data] $\left( p-value < 5\times10^{-8} \right)$
+1. .font130[Selection of genome-wide significant instruments from GWAS exposure data] $\left( p-value < 5\times10^{-8} \right)$
   - One can select functional genetic variants, i.e. genome-wide
     significant SNPs in the encoding gene
   - Check $F-statistic$ to evaluate the strength of the instrument
 
-1. .font140[Perform LD clumping to select independent genetic instruments]
-  - Typical thresholds at $r^{2} < 0.01$ and $r^{2} < 0.001$
+1. .font130[Perform LD clumping to select independent genetic instruments]
+  - Choice of $r^{2}$ threshold might depend on the situation
+  - $r^{2}<0.001$ is very conservative but might not work well for rare
+    variants in small samples 
+  - $r^{2}<0.01$ is less conservative but acceptable for many situations
+  - Some studies used more liberal thresholds, e.g. $<0.2$
   
-1. .font140[Proxies can be used to replace exposure variants that are missing in the outcome dataset]
+1. .font130[Proxies can be used to replace exposure variants that are missing in the outcome dataset]
   - The proxy should be in high LD with the missing genetic instrument
   
-1. .font140[Applying Steiger filter to remove IVs for which there might evidence of reverse causation]
+1. .font130[Applying Steiger filter to remove IVs for which there might evidence of reverse causation]
 
 ---
 
