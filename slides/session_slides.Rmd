@@ -349,8 +349,8 @@ about the nature of the underlying pleiotropy
 
 <br>
 
-  + font120[40 SNPs associated with both eGFRcr and blood urea nitrogen (BUN) at genome-wide threshold] $\left( p-value < 5\times10^{-8} \right)$ $\rightarrow$ .font120[prioritizing IVs most likely relevant for 
-  kidney function]
+  + .font120[40 SNPs associated with both eGFRcr and blood urea nitrogen (BUN) at genome-wide threshold] $\left( p-value < 5\times10^{-8} \right)$ $\rightarrow$ prioritizing IVs most likely relevant for 
+  kidney function
 
 <br>
 
