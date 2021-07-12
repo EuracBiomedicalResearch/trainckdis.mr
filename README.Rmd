@@ -144,7 +144,8 @@ a gentle introduction to basic commands in `R`
 | Name                                                                  | Affiliation                                                                                                        |
 |:----------------------------------------------------------------------|:-------------------------------------------------------------------------------------------------------------------|
 | [Daniele Bottigliengo](https://github.com/danielebottigliengo)        | [EURAC Research, Institute for Biomedicine](https://www.eurac.edu/en/institutes-centers/institute-for-biomedicine) |
-| [Adrienne Tin](https://scholar.google.com/citations?user=8FfPK3gAAAAJ&hl=en)         | [University of Mississippi Medical Center](https://www.umc.edu/)
+| [Adrienne Tin](https://scholar.google.com/citations?user=8FfPK3gAAAAJ&hl=en)         | [University of Mississippi Medical Center](https://www.umc.edu/) |
+| [Alexander Teumer](https://loop.frontiersin.org/people/339263/overview)         | [Institute for Community Medicine, University Medicine Greifswald](https://www2.medizin.uni-greifswald.de/icm/index.php?id=19&L=1) |
 
 ## Reading list
 Before starting the session, the reading of the following papers is
