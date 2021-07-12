@@ -133,15 +133,24 @@ install.packages("MendelianRandomization", dependencies = TRUE)
 
 # Data sources
 
-&lt;br&gt;
-
-&lt;br&gt;
-
 - .font150[Retrieving summary-level GWAS data:]
 
-  - .font130[[Phenoscanner](http://www.phenoscanner.medschl.cam.ac.uk/)] `-&gt; MendelianRandomization`
+  - .font120[[NHGRI-EBI GWAS Catalog](https://www.ebi.ac.uk/gwas/)]
+  
+  - .font120[[dbGaP CHARGE Consortium GWAS results](https://www.ncbi.nlm.nih.gov/gap/) (*study accession phs000930*)]
+  
+  - .font120[[Neale lab](http://www.nealelab.is/uk-biobank)]
+  
+  - .font120[[GeneATLAS](http://geneatlas.roslin.ed.ac.uk/)]
+  
+  - .font120[[FinnGen cohort](http://r2.finngen.fi/)]
 
-  - .font130[[IEU GWAS database](https://gwas.mrcieu.ac.uk/)] `-&gt; TwoSampleMR`
+  - .font120[[Phenoscanner](http://www.phenoscanner.medschl.cam.ac.uk/)] `-&gt; MendelianRandomization`
+
+  - .font120[[IEU GWAS database](https://gwas.mrcieu.ac.uk/)] `-&gt; TwoSampleMR`
+  
+  - GWAS consortium websites, e.g. **CKDGen**, **GIANT**, **MAGIC**,
+    **ENIGMA**, **ThyroidOmics**, **COVID-19 HGI**
 
 &lt;br&gt;
 
@@ -197,8 +206,8 @@ class: middle
 
 # MR analysis
 
-<div id="htmlwidget-6694c4a8033d98966370" style="width:103%;height:103%;" class="grViz html-widget"></div>
-<script type="application/json" data-for="htmlwidget-6694c4a8033d98966370">{"x":{"diagram":"digraph{\n                          \n  graph[layout = dot, rankdir = LR]\n  \n  # Define the global shape of the boxes\n  node [shape = rectangle, style = filled, fillcolor = OrangeRed]\n  \n  # Define the nodes\n  primary [label = \"Primary \n analysis\"]\n  iv [label = \"One \n genetic instrument\", style = dashed, shape = plaintext]\n  ivs [label = \"Multiple \n genetic instruments\", style = dashed, shape = plaintext]\n  wald [label = \"Wald estimator\", fillcolor = DarkOrange]\n  ivw [label = \"IVW\", fillcolor = DarkOrange]\n  fe [label = \"IVW \n fixed-effect\", shape = oval]\n  re [label = \"IVW \n random-effect \n (default)\", shape = oval]\n  corr [label = \"IVW \n fixed-effect \n correlated variants\", shape = oval, fillcolor = DarkTurquoise]\n  ce [label = \"Has a causal effect \n been identified?\", style = dashed, shape = plaintext]\n  sens [label = \"Sensitivity analyses\"]\n  \n  \n  # Define the edges\n  primary -> {iv, ivs} iv -> wald ivs -> ivw ivw -> {re, fe}\n  fe -> corr fe -> ce corr -> ce re -> ce ce -> sens\n  \n\n}","config":{"engine":"dot","options":null}},"evals":[],"jsHooks":[]}</script>
+<div id="htmlwidget-3809500ef3e96bf45016" style="width:103%;height:103%;" class="grViz html-widget"></div>
+<script type="application/json" data-for="htmlwidget-3809500ef3e96bf45016">{"x":{"diagram":"digraph{\n                          \n  graph[layout = dot, rankdir = LR]\n  \n  # Define the global shape of the boxes\n  node [shape = rectangle, style = filled, fillcolor = OrangeRed]\n  \n  # Define the nodes\n  primary [label = \"Primary \n analysis\"]\n  iv [label = \"One \n genetic instrument\", style = dashed, shape = plaintext]\n  ivs [label = \"Multiple \n genetic instruments\", style = dashed, shape = plaintext]\n  wald [label = \"Wald estimator\", fillcolor = DarkOrange]\n  ivw [label = \"IVW\", fillcolor = DarkOrange]\n  fe [label = \"IVW \n fixed-effect\", shape = oval]\n  re [label = \"IVW \n random-effect \n (default)\", shape = oval]\n  corr [label = \"IVW \n fixed-effect \n correlated variants\", shape = oval, fillcolor = DarkTurquoise]\n  ce [label = \"Has a causal effect \n been identified?\", style = dashed, shape = plaintext]\n  sens [label = \"Sensitivity analyses\"]\n  \n  \n  # Define the edges\n  primary -> {iv, ivs} iv -> wald ivs -> ivw ivw -> {re, fe}\n  fe -> corr fe -> ce corr -> ce re -> ce ce -> sens\n  \n\n}","config":{"engine":"dot","options":null}},"evals":[],"jsHooks":[]}</script>
 
 ---
 

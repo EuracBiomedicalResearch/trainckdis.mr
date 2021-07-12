@@ -133,15 +133,24 @@ install.packages("MendelianRandomization", dependencies = TRUE)
 
 # Data sources
 
-<br>
-
-<br>
-
 - .font150[Retrieving summary-level GWAS data:]
 
-  - .font130[[Phenoscanner](http://www.phenoscanner.medschl.cam.ac.uk/)] `-> MendelianRandomization`
+  - .font120[[NHGRI-EBI GWAS Catalog](https://www.ebi.ac.uk/gwas/)]
+  
+  - .font120[[dbGaP CHARGE Consortium GWAS results](https://www.ncbi.nlm.nih.gov/gap/) (*study accession phs000930*)]
+  
+  - .font120[[Neale lab](http://www.nealelab.is/uk-biobank)]
+  
+  - .font120[[GeneATLAS](http://geneatlas.roslin.ed.ac.uk/)]
+  
+  - .font120[[FinnGen cohort](http://r2.finngen.fi/)]
 
-  - .font130[[IEU GWAS database](https://gwas.mrcieu.ac.uk/)] `-> TwoSampleMR`
+  - .font120[[Phenoscanner](http://www.phenoscanner.medschl.cam.ac.uk/)] `-> MendelianRandomization`
+
+  - .font120[[IEU GWAS database](https://gwas.mrcieu.ac.uk/)] `-> TwoSampleMR`
+  
+  - GWAS consortium websites, e.g. **CKDGen**, **GIANT**, **MAGIC**,
+    **ENIGMA**, **ThyroidOmics**, **COVID-19 HGI**
 
 <br>
 
