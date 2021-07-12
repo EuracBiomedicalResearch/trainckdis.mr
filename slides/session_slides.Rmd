@@ -183,7 +183,7 @@ install.packages("MendelianRandomization", dependencies = TRUE)
   - Check $F-statistic$ to evaluate the strength of the instrument
 
 1. .font140[Perform LD clumping to select independent genetic instruments]
-  - Default at $r^{2} < 0.001$
+  - Typical thresholds at $r^{2} < 0.01$ and $r^{2} < 0.001$
   
 1. .font140[Proxies can be used to replace exposure variants that are missing in the outcome dataset]
   - The proxy should be in high LD with the missing genetic instrument
