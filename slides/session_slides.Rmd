@@ -369,3 +369,13 @@ about the nature of the underlying pleiotropy
 
 <br>
 
+.font140[The case study was inspired the study from Yu et al. (2020)<sup>2</sup>]
+
+.footnote[
+.font70[
+
+[2] Yu Z, Coresh J, Qi G, Grams M, Boerwinkle E, Snieder H, Teumer A, Pattaro C, Köttgen A, Chatterjee N, Tin A. **A bidirectional Mendelian randomization study supports causal effects of kidney function on blood pressure.** *Kidney Int.* 2020 Sep;98(3):708-716. doi: 10.1016/j.kint.2020.04.044. Epub 2020 May 23. PMID: 32454124; PMCID: PMC7784392.
+
+]
+]
+
