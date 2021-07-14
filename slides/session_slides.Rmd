@@ -354,7 +354,7 @@ about the nature of the underlying pleiotropy
 # Case study
 
 
-- .font140[Two sets of IVs:]
+.font140[Two sets of IVs:]
 
 <br>
 
