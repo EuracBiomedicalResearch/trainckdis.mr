@@ -204,6 +204,8 @@ install.packages("MendelianRandomization", dependencies = TRUE)
 
 <https://elifesciences.org/articles/34408>
 
+**See [here](https://mrcieu.github.io/TwoSampleMR/articles/harmonise.html) for more details.**
+
 ---
 
 class: middle
